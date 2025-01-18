@@ -18,7 +18,7 @@ choice for most use cases. Lots of serialization like in protocol buffers is one
 
 You have been warned.
 
-With that said, here is benchmarks on simple usage of the arena:
+With that said, here is benchmarks on simple usage of the arena (1KiB allocs, a 10MiB arena):
 
 	BenchmarkStdAllocations-10                    93          11082950 ns/op        62914999 B/op      40964 allocs/op
 	BenchmarkSyncPoolAllocations-10              141           8547342 ns/op        42451073 B/op      40986 allocs/op
