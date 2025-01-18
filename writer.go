@@ -2,9 +2,7 @@ package arena
 
 import (
 	"io"
-	syncLib "sync"
-
-	"go.goms.io/aks/base/concurrency/sync"
+	"sync"
 )
 
 // Reader reads from a block of bytes that came from an Arena. It implements io.Reader.
@@ -16,7 +14,7 @@ type Reader struct {
 	at    int
 
 	once sync.Once
-	wg   *syncLib.WaitGroup
+	wg   *sync.WaitGroup
 }
 
 // Read reads up to len(b) bytes into b. It returns the number of bytes read.
@@ -78,7 +76,7 @@ type Writer struct {
 	at    int
 
 	once sync.Once
-	wg   *syncLib.WaitGroup
+	wg   *sync.WaitGroup
 }
 
 // Write writes len(b) bytes from b to the underlying data stream. It returns the number of bytes written.

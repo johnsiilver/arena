@@ -13,7 +13,7 @@ areans are dangerous. You have to be very careful with them as you can unintenti
 or cause allocations.
 
 If you are not a very advanced Go programmer, you should just keep walking past this. If you are that
-advanced programmer, you need to have a very good reason to use this. sync.Pool is usually a better
+advanced programmer, you need to have a very good reason to use this. mempool.Pool is usually a better
 choice for most use cases. Lots of serialization like in protocol buffers is one of the few good use cases.
 
 You have been warned.
@@ -24,9 +24,9 @@ With that said, here is benchmarks on simple usage of the arena:
 	BenchmarkSyncPoolAllocations-10              141           8547342 ns/op        42451073 B/op      40986 allocs/op
 	BenchmarkArenaAllocations-10                 492           2416193 ns/op         1332307 B/op      20482 allocs/op
 
-	This allocates half as many times as either the std allocator or sync.Pool.
+	This allocates half as many times as either the std allocator or mempool.Pool.
 	Vs standard allocation: It uses 47 times less memory than std and is 4 times faster.
-	Vs sync.Pool: It uses 31 times less memory than sync.Pool and is 3.5 times faster.
+	Vs mempool.Pool: It uses 31 times less memory than mempool.Pool and is 3.5 times faster.
 
 So if you are super careful and use this in the exact right place, you can achieve some pretty good results.
 */
@@ -35,9 +35,10 @@ package arena
 import (
 	"context"
 	"fmt"
+	"sync"
 	syncLib "sync"
 
-	"go.goms.io/aks/base/concurrency/sync"
+	"github.com/johnsiilver/arena/internal/mempool"
 )
 
 // arenaFullErr is returned when the arena is full.
@@ -113,7 +114,7 @@ type Pool struct {
 
 	mu      sync.Mutex
 	current *arena
-	pool    sync.Pool[*arena]
+	pool    mempool.Pool[*arena]
 	arenas  []*arena
 }
 
@@ -124,7 +125,7 @@ func New(ctx context.Context, name string, size, reasonable uint, buffer int) (*
 	p := &Pool{
 		size:       size,
 		reasonable: reasonable,
-		pool: sync.NewPool[*arena](
+		pool: mempool.NewPool[*arena](
 			ctx,
 			name,
 			func() *arena {
@@ -134,7 +135,7 @@ func New(ctx context.Context, name string, size, reasonable uint, buffer int) (*
 				}
 				return a
 			},
-			sync.WithBuffer(buffer),
+			mempool.WithBuffer(buffer),
 		),
 	}
 	a, err := newArena(size, reasonable)
