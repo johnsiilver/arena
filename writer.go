@@ -1,6 +1,7 @@
 package arena
 
 import (
+	"errors"
 	"io"
 	"sync"
 )
@@ -39,6 +40,15 @@ func (r *Reader) Len() int {
 // Cap returns the capacity of the buffer's underlying byte slice, that is, the total space allocated for the buffer's data.
 func (r *Reader) Cap() int {
 	return cap(r.block)
+}
+
+// Peek allows peeking ahead n bytes without moving the Reader forward. This will return the next n bytes
+// from the underlying slice.
+func (r *Reader) Peek(n int) ([]byte, error) {
+	if r.at+n > len(r.block) {
+		return nil, errors.New("block is not big enough to peek ahead that far")
+	}
+	return r.block[r.at : r.at+n], nil
 }
 
 // Bytes returns a slice of length b.Len() holding the unread portion of the buffer. The slice is valid for use only until
